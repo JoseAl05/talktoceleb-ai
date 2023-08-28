@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -14,4 +15,44 @@ datasource db {
 model Category {
   id   String @id @default(uuid())
   name String
+
+  Celebs Celeb[]
+}
+
+model Celeb {
+  id           String   @id @default(uuid())
+  userId       String
+  categoryId   String
+  username     String
+  image        String
+  name         String   @db.Text
+  description  String
+  instructions String   @db.Text
+  seed         String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  category     Category @relation(fields: [categoryId],references: [id])
+  messages     Message[]
+
+  @@index([categoryId])
+  @@fulltext([name])
+}
+
+enum Role {
+  user
+  system
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  celebId   String
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      Role
+
+  celeb     Celeb    @relation(fields: [celebId],references: [id],onDelete: Cascade)
+
+  @@index([celebId])
 }
